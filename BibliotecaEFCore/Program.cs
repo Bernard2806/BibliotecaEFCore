@@ -11,69 +11,79 @@ namespace BibliotecaEFCore
     {
         static async Task Main(string[] args)
         {
-            using IHost host = Host.CreateDefaultBuilder(args)
-                .ConfigureServices((_, services) =>
-                {
-                    services.AddDbContext<BibliotecaContext>(options => options.UseSqlite("Data Source=biblioteca.db"));
-
-                    services.AddTransient<IAutorService, AutorService>();
-                    services.AddTransient<ILibroService, LibroService>();
-                    services.AddTransient<IUsuarioService, UsuarioService>();
-                    services.AddTransient<IPrestamoService, PrestamoService>();
-
-                    services.AddHostedService<InitData>();
-                })
-                .Build();
-
-            using var scope = host.Services.CreateScope();
-
-            var autorService = scope.ServiceProvider.GetRequiredService<IAutorService>();
-            var libroService = scope.ServiceProvider.GetRequiredService<ILibroService>();
-            var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
-            var prestamoService = scope.ServiceProvider.GetRequiredService<IPrestamoService>();
-
-            while (true)
             {
-                var option = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("[green]Seleccione una opción del menú:[/]")
-                        .AddChoices(new[]
-                        {
-                                "1. Crear Autor",
-                                "2. Crear Libro",
-                                "3. Crear Usuario",
-                                "4. Registrar Préstamo",
-                                "5. Salir"
-                        }));
+                // 1) Construye el host sin el InitData
+                using IHost host = Host.CreateDefaultBuilder(args)
+                    .ConfigureServices((_, services) =>
+                    {
+                        services.AddDbContext<BibliotecaContext>(options =>
+                            options.UseSqlite("Data Source=biblioteca.db"));
 
-                switch (option)
+                        services.AddTransient<IAutorService, AutorService>();
+                        services.AddTransient<ILibroService, LibroService>();
+                        services.AddTransient<IUsuarioService, UsuarioService>();
+                        services.AddTransient<IPrestamoService, PrestamoService>();
+                    })
+                    .Build();
+
+                // 2) Aplica las migraciones en caliente
+                using (var scope = host.Services.CreateScope())
                 {
-                    case "1. Crear Autor":
-                        CrearAutor(autorService);
-                        break;
+                    var ctx = scope.ServiceProvider.GetRequiredService<BibliotecaContext>();
+                    ctx.Database.Migrate();
+                }
 
-                    case "2. Crear Libro":
-                        CrearLibro(libroService, autorService);
-                        break;
+                // 3) Crea un scope para resolver tus servicios de aplicación
+                using var appScope = host.Services.CreateScope();
+                var autorService = appScope.ServiceProvider.GetRequiredService<IAutorService>();
+                var libroService = appScope.ServiceProvider.GetRequiredService<ILibroService>();
+                var usuarioService = appScope.ServiceProvider.GetRequiredService<IUsuarioService>();
+                var prestamoService = appScope.ServiceProvider.GetRequiredService<IPrestamoService>();
 
-                    case "3. Crear Usuario":
-                        CrearUsuario(usuarioService);
-                        break;
+                // 4) Bucle principal de menú
+                while (true)
+                {
+                    AnsiConsole.Clear();
+                    var option = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("[green]Seleccione una opción del menú:[/]")
+                            .AddChoices(new[]
+                            {
+                            "1. Crear Autor",
+                            "2. Crear Libro",
+                            "3. Crear Usuario",
+                            "4. Registrar Préstamo",
+                            "5. Salir"
+                            }));
 
-                    case "4. Registrar Préstamo":
-                        RegistrarPrestamo(prestamoService, libroService, usuarioService);
-                        break;
+                    switch (option)
+                    {
+                        case "1. Crear Autor":
+                            CrearAutor(autorService);
+                            break;
 
-                    case "5. Salir":
-                        AnsiConsole.MarkupLine("[yellow]Saliendo del programa...[/]");
-                        return;
+                        case "2. Crear Libro":
+                            CrearLibro(libroService, autorService);
+                            break;
 
-                    default:
-                        AnsiConsole.MarkupLine("[red]Opción no válida.[/]");
-                        break;
+                        case "3. Crear Usuario":
+                            CrearUsuario(usuarioService);
+                            break;
+
+                        case "4. Registrar Préstamo":
+                            RegistrarPrestamo(prestamoService, libroService, usuarioService);
+                            break;
+
+                        case "5. Salir":
+                            AnsiConsole.MarkupLine("[yellow]Saliendo del programa...[/]");
+                            return;
+
+                        default:
+                            AnsiConsole.MarkupLine("[red]Opción no válida.[/]");
+                            break;
+                    }
                 }
             }
-            await host.RunAsync();
         }
 
         static void CrearAutor(IAutorService autorService)
