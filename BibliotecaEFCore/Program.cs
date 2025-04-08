@@ -14,7 +14,8 @@ namespace BibliotecaEFCore
             using IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((_, services) =>
                 {
-                    services.AddDbContext<BibliotecaContext>();
+                    services.AddDbContext<BibliotecaContext>(options => options.UseSqlite("Data Source=biblioteca.db"));
+
                     services.AddTransient<IAutorService, AutorService>();
                     services.AddTransient<ILibroService, LibroService>();
                     services.AddTransient<IUsuarioService, UsuarioService>();
@@ -72,7 +73,6 @@ namespace BibliotecaEFCore
                         break;
                 }
             }
-
             await host.RunAsync();
         }
 
