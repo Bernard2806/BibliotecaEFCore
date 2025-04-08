@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BibliotecaEFCore
+namespace BibliotecaEFCore.Data.Models
 {
     /// <summary>
     /// Clase que representa un libro en la biblioteca.
