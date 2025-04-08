@@ -11,6 +11,8 @@ namespace BibliotecaEFCore.Services
     public interface IAutorService
     {
         Autor CrearAutor(string nombres, string apellidos);
+        Autor? ObtenerAutor(int id);
+        List<Autor> ObtenerAutores();
     }
 
     public class AutorService : IAutorService
@@ -25,6 +27,16 @@ namespace BibliotecaEFCore.Services
             _context.SaveChanges();
             Console.WriteLine($"Autor creado: {nombres}, {apellidos}");
             return autor;
+        }
+
+        public Autor? ObtenerAutor(int id) 
+        {
+            return _context.Autores.Find(id);
+        }
+
+        public List<Autor> ObtenerAutores()
+        {
+            return _context.Autores.ToList();
         }
     }
 }

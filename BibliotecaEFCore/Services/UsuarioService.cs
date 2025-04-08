@@ -11,6 +11,7 @@ namespace BibliotecaEFCore.Services
     public interface IUsuarioService
     {
         Usuario CrearUsuario(string nombre, string apellidos);
+        Usuario? ObtenerUsuario(int id);
     }
 
     public class UsuarioService : IUsuarioService
@@ -25,6 +26,10 @@ namespace BibliotecaEFCore.Services
             _context.SaveChanges();
             Console.WriteLine($"Usuario registrado: {nombre}, {apellidos}");
             return usuario;
+        }
+
+        public Usuario? ObtenerUsuario(int id) { 
+            return _context.Usuarios.Find(id);
         }
     }
 }

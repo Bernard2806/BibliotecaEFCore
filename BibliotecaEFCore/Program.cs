@@ -89,6 +89,7 @@ namespace BibliotecaEFCore
             var titulo = AnsiConsole.Ask<string>("Ingrese el [green]título[/] del libro:");
             var anio = AnsiConsole.Ask<int>("Ingrese el [green]año de publicación[/] del libro:");
 
+            var autor = autorService.ObtenerAutor(SeleccionarAutor(autorService).Value);
 
             if (autor == null)
             {
@@ -96,7 +97,7 @@ namespace BibliotecaEFCore
                 return;
             }
 
-            var libro = libroService.CrearLibro(titulo, anio, autorId);
+            var libro = libroService.CrearLibro(titulo, anio, autor.Id);
             AnsiConsole.MarkupLine($"[blue]Libro creado con éxito:[/] {libro.Titulo} (ID: {libro.Id})");
         }
 
@@ -130,6 +131,27 @@ namespace BibliotecaEFCore
 
             var prestamo = prestamoService.RegistrarPrestamo(libroId, usuarioId);
             AnsiConsole.MarkupLine($"[blue]Préstamo registrado con éxito:[/] Libro '{libro.Titulo}' prestado a {usuario.Nombre} {usuario.Apellido}.");
+        }
+
+        static int? SeleccionarAutor(IAutorService autorService)
+        {
+            var autores = autorService.ObtenerAutores();
+
+            if (autores == null || !autores.Any())
+            {
+                AnsiConsole.MarkupLine("[red]No hay autores disponibles.[/]");
+                return null;
+            }
+
+            var autorSeleccionado = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Seleccione un [green]autor[/]:")
+                    .PageSize(10)
+                    .AddChoices(autores.Select(a => $"{a.Id}: {a.Nombres}, {a.Apellidos}")));
+
+            // Extraer el ID del string seleccionado (formato "ID: Nombre")
+            int id = int.Parse(autorSeleccionado.Split(':')[0]);
+            return id;
         }
     }
 }
