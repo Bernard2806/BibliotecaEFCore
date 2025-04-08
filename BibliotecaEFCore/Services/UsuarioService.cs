@@ -12,6 +12,7 @@ namespace BibliotecaEFCore.Services
     {
         Usuario CrearUsuario(string nombre, string apellidos);
         Usuario? ObtenerUsuario(int id);
+        List<Usuario> ObtenerUsuarios();
     }
 
     public class UsuarioService : IUsuarioService
@@ -28,8 +29,14 @@ namespace BibliotecaEFCore.Services
             return usuario;
         }
 
-        public Usuario? ObtenerUsuario(int id) { 
+        public Usuario? ObtenerUsuario(int id)
+        {
             return _context.Usuarios.Find(id);
+        }
+
+        public List<Usuario> ObtenerUsuarios()
+        {
+            return _context.Usuarios.ToList();
         }
     }
 }

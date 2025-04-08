@@ -11,6 +11,8 @@ namespace BibliotecaEFCore.Services
     public interface ILibroService
     {
         Libro CrearLibro(string titulo, int anio, int autorId);
+        List<Libro> ObtenerLibros();
+        Libro? ObtenerLibro(int id);
     }
 
     public class LibroService : ILibroService
@@ -25,6 +27,16 @@ namespace BibliotecaEFCore.Services
             _context.SaveChanges();
             Console.WriteLine($"Libro agregado: {titulo}");
             return libro;
+        }
+
+        public List<Libro> ObtenerLibros()
+        {
+            return _context.Libros.ToList();
+        }
+
+        public Libro? ObtenerLibro(int id) 
+        {
+            return _context.Libros.Find(id);
         }
     }
 }

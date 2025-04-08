@@ -111,8 +111,7 @@ namespace BibliotecaEFCore
 
         static void RegistrarPrestamo(IPrestamoService prestamoService, ILibroService libroService, IUsuarioService usuarioService)
         {
-            var libroId = AnsiConsole.Ask<int>("Ingrese el [green]ID del libro[/]:");
-            var libro = libroService.ObtenerLibroPorId(libroId);
+            var libro = libroService.ObtenerLibro(SeleccionarLibro(libroService).Value);
 
             if (libro == null)
             {
@@ -120,8 +119,7 @@ namespace BibliotecaEFCore
                 return;
             }
 
-            var usuarioId = AnsiConsole.Ask<int>("Ingrese el [green]ID del usuario[/]:");
-            var usuario = usuarioService.ObtenerUsuarioPorId(usuarioId);
+            var usuario = usuarioService.ObtenerUsuario(SeleccionarUsuario(usuarioService).Value);
 
             if (usuario == null)
             {
@@ -129,9 +127,11 @@ namespace BibliotecaEFCore
                 return;
             }
 
-            var prestamo = prestamoService.RegistrarPrestamo(libroId, usuarioId);
-            AnsiConsole.MarkupLine($"[blue]Préstamo registrado con éxito:[/] Libro '{libro.Titulo}' prestado a {usuario.Nombre} {usuario.Apellido}.");
+            var prestamo = prestamoService.RegistrarPrestamo(libro.Id, usuario.Id);
+            AnsiConsole.MarkupLine($"[blue]Préstamo registrado con éxito:[/] Libro '{libro.Titulo}' prestado a {usuario.Nombres} {usuario.Apellidos}.");
         }
+
+        // Menus de Seleccion
 
         static int? SeleccionarAutor(IAutorService autorService)
         {
@@ -151,6 +151,46 @@ namespace BibliotecaEFCore
 
             // Extraer el ID del string seleccionado (formato "ID: Nombre")
             int id = int.Parse(autorSeleccionado.Split(':')[0]);
+            return id;
+        }
+
+        static int? SeleccionarLibro(ILibroService libroService)
+        {
+            var libros = libroService.ObtenerLibros();
+
+            if (libros == null || !libros.Any())
+            {
+                AnsiConsole.MarkupLine("[red]No hay libros disponibles.[/]");
+                return null;
+            }
+
+            var libroSeleccionado = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Seleccione un [green]libro[/]:")
+                    .PageSize(10)
+                    .AddChoices(libros.Select(l => $"{l.Id}: {l.Titulo}")));
+
+            // Extraer el ID del string seleccionado (formato "ID: Título")
+            int id = int.Parse(libroSeleccionado.Split(':')[0]);
+
+            return id;
+        }
+
+        static int? SeleccionarUsuario(IUsuarioService usuarioService)
+        {
+            var usuarios = usuarioService.ObtenerUsuarios();
+            if (usuarios == null || !usuarios.Any())
+            {
+                AnsiConsole.MarkupLine("[red]No hay usuarios disponibles.[/]");
+                return null;
+            }
+            var usuarioSeleccionado = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Seleccione un [green]usuario[/]:")
+                    .PageSize(10)
+                    .AddChoices(usuarios.Select(u => $"{u.Id}: {u.Nombres}, {u.Apellidos}")));
+            // Extraer el ID del string seleccionado (formato "ID: Nombre")
+            int id = int.Parse(usuarioSeleccionado.Split(':')[0]);
             return id;
         }
     }
