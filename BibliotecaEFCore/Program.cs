@@ -30,9 +30,9 @@ namespace BibliotecaEFCore
             var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
             var prestamoService = scope.ServiceProvider.GetRequiredService<IPrestamoService>();
 
-            var autor = autorService.CrearAutor("Gabriel García Márquez");
+            var autor = autorService.CrearAutor("Gabriel", "García Márquez");
             var libro = libroService.CrearLibro("Cien Años de Soledad", 1967, autor.Id);
-            var usuario = usuarioService.CrearUsuario("Juan Pérez");
+            var usuario = usuarioService.CrearUsuario("Juan", "Pérez");
             var prestamo = prestamoService.RegistrarPrestamo(libro.Id, usuario.Id);
 
             await host.RunAsync();
