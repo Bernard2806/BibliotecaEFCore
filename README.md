@@ -43,3 +43,4 @@ dotnet run
 - .NET 8
 - Entity Framework Core
 - SQLite
+- Spectre.Console
